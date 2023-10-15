@@ -1,0 +1,56 @@
+import os
+import tkinter as tk
+from tkinter import ttk
+from tkinter import filedialog
+from ttkthemes import ThemedTk
+import pygame
+
+class MusicPlayer:
+    def __init__(self, root):
+        self.root = root
+        self.root.set_theme("plastik")
+
+        self.root.title("Modern Music Player")
+        self.root.geometry("600x400")
+
+        self.music_files = []
+        self.current_song = None
+
+        self.playlist_box = tk.Listbox(root, selectmode=tk.SINGLE)
+        self.playlist_box.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+
+        self.play_button = ttk.Button(root, text="Play", command=self.play_music)
+        self.play_button.pack(pady=10)
+
+        self.stop_button = ttk.Button(root, text="Stop", command=self.stop_music)
+        self.stop_button.pack(pady=10)
+
+        self.add_button = ttk.Button(root, text="Add Music", command=self.add_music)
+        self.add_button.pack(pady=10)
+
+        pygame.mixer.init()
+
+    def add_music(self):
+        file_paths = filedialog.askopenfilenames(defaultextension=".mp3", filetypes=[("MP3 files", "*.mp3")])
+        for file_path in file_paths:
+            self.music_files.append(file_path)
+            song_name = os.path.basename(file_path)
+            self.playlist_box.insert(tk.END, song_name)
+
+    def play_music(self):
+        selected_song_index = self.playlist_box.curselection()
+        if selected_song_index:
+            song_index = int(selected_song_index[0])
+            if self.current_song is not None:
+                pygame.mixer.music.stop()
+            self.current_song = self.music_files[song_index]
+            pygame.mixer.music.load(self.current_song)
+            pygame.mixer.music.play()
+
+    def stop_music(self):
+        pygame.mixer.music.stop()
+
+if __name__ == "__main__":
+    root = ThemedTk()
+    music_player = MusicPlayer(root)
+    root.mainloop()
